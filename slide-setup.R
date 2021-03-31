@@ -9,7 +9,7 @@ setup <- function(slides) {
   <div class="slides-footer">
   <span>
   
-  <a class = "footer-icon-link" href = "https://github.com/datalorax/psych-seminar21/raw/anderson-psych-seminar21.pdf">
+  <a class = "footer-icon-link" href = "https://github.com/datalorax/psych-seminar21/raw/main/anderson-psych-seminar21.pdf">
     <i class = "footer-icon" data-feather="download"></i>
   </a>
   
