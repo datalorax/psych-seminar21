@@ -226,6 +226,10 @@ svg:hover {
 	color: #ff65ad;
 }
 
+.inverse-green svg {
+	color: #fff;
+}
+
 a.footer-icon-link {
 	box-shadow: none;
   border-bottom: none;

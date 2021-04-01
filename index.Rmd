@@ -1235,6 +1235,7 @@ class: inverse-green middle
 
 ## Questions?
 
-`r icons::fontawesome("twitter")` [@datalorax_](https://twitter.com/datalorax_)
-`r icons::fontawesome("github")` [@datalorax](https://github.com/datalorax)
-`r icons::fontawesome("envelope")` [daniela@uoregon.edu](mailto:daniela@uoregon.edu)
+`r icons::feather_icons("twitter")` [@datalorax_](https://twitter.com/datalorax_)
+`r icons::feather_icons("github")` [@datalorax](https://github.com/datalorax)
+`r icons::feather_icons("globe")` [website](www.datalorax.com)
+`r icons::feather_icons("mail")` [daniela@uoregon.edu](mailto:daniela@uoregon.edu)
