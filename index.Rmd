@@ -476,6 +476,311 @@ colorblindr::cvd_grid(p2)
 
 ---
 class: inverse-blue middle
+# Visualizing Uncertainty
+
+---
+# The primary problem
+* When we see a point on a plot, we interpret it as .bolder[THE] value.
+
+```{r loc_point, echo = FALSE}
+ggplot(data.frame(x = -5:5, y = -5:5), aes(x, y)) +
+  geom_point(data = data.frame(x = 3, y = 2),
+             color = "magenta",
+             size = 5) +
+  geom_segment(aes(x = 5, xend = 3.2, y = 4, yend = 2.2),
+               arrow = arrow(length = unit(0.5, "cm"),
+                             type = "closed"),
+               color = "gray40") +
+  geom_vline(xintercept = 0, 
+             color = "gray40",
+             size = 1.4) +
+  geom_hline(yintercept = 0,
+             color = "gray40",
+             size = 1.4) +
+  scale_x_continuous(limits = c(-5, 5), breaks = seq(-5, 5, 2)) +
+  scale_y_continuous(limits = c(-5, 5), breaks = seq(-5, 5, 2)) +
+  coord_fixed()
+```
+
+---
+# Some secondary problem
+* We're not great at understanding probabilities
+* We regularly round probabilities to 100% or 0%
+* As probabilities move to the tails, we're generally worse
+
+---
+# How do we typically communicate uncertainty?
+* Error bars
+
+```{r error_bars, echo = FALSE, fig.height = 6}
+ggplot(data.frame(x = -5:5, y = -5:5), aes(x, y)) +
+  geom_errorbar(data = data.frame(x = 3, y = 2),
+               aes(ymin = 1.5, ymax = 2.5),
+               color = "gray40",
+               size = 1.4) +
+  geom_point(data = data.frame(x = 3, y = 2),
+             color = "magenta",
+             size = 5) +
+  geom_vline(xintercept = 0, 
+             color = "gray40",
+             size = 1.4) +
+  geom_hline(yintercept = 0,
+             color = "gray40",
+             size = 1.4) +
+  scale_x_continuous(limits = c(-5, 5), breaks = seq(-5, 5, 2)) +
+  scale_y_continuous(limits = c(-5, 5), breaks = seq(-5, 5, 2)) +
+  coord_fixed()
+```
+
+---
+# Thinking about uncertainty
+Uncertainty means exactly what it sounds like - we are not 100% sure.
+
+* We are nearly always uncertain of future events (forecasting)
+* We can also be uncertain about past events 
+  + I saw a parked car at 8 AM, but the next time I looked at 2PM it was gone. What time did it leave?
+  
+
+--
+### Quantifying uncertainty
+* We quantify our uncertainty mathematically using probability
+* Framing probabilities as frequencies is generally more intuitive
+
+---
+class: bottom
+background-image:url("https://serialmentor.com/dataviz/visualizing_uncertainty_files/figure-html/probability-waffle-1.png")
+background-size:contain
+
+# Framing a single uncertainty
+
+---
+# Non-discrete probabilities
+
+Blue party has 1% advantage w/ margin of error of 1.76 points
+
+### Who will win?
+
+--
+
+```{r pdf, echo = FALSE, fig.height = 5.5}
+# Wilke code
+x <- c(seq(-2.5, 0, length.out = 50), seq(0.00001, 5, length.out = 100))
+mu <- 1.02
+sd <- .9
+
+df_norm <- data.frame(
+  x,
+  y = dnorm(x, mu, sd),
+  type = ifelse(x <= 0, "A", "B")
+)
+
+ci_x <- c(qnorm(.025, mu, sd), qnorm(0.975, mu, sd))
+ci_y <- dnorm(ci_x, mu, sd)
+
+df_annot <- data.frame(
+  x = c(mu + 0.05, mu + 0.1, mu + 2.3*sd, mu - 2.5*sd),
+  y = c(dnorm(mu, mu, sd) + 0.04, ci_y[1] + 0.01, 3*ci_y[1], 3*ci_y[1]),
+  hjust = c(0, 0, 0.5, 0.5),
+  vjust = c(1, 0, 0.5, 0.5),
+  label = c("best estimate", "margin of error", "blue wins", "yellow wins")
+)
+
+ggplot(df_norm, aes(x, y)) +
+  geom_area(aes(fill = type)) +
+  geom_vline(xintercept = 0, linetype = 4, color = "gray50", size = 1.4) +
+  geom_line() +
+  geom_segment(
+    data = data.frame(x = 1),
+    x = ci_x[1], xend = ci_x[2], y = ci_y[1], yend = ci_y[2],
+    arrow = arrow(angle = 15, length = grid::unit(15, "pt"), ends = "both", type = "closed"),
+    inherit.aes = FALSE
+  ) +
+  geom_segment(
+    data = data.frame(x = 1),
+    x = mu, xend = mu, y = 0, yend = dnorm(mu, mu, sd) + 0.04,
+    inherit.aes = FALSE
+  ) +
+  geom_text(
+    data = df_annot,
+    aes(x, y, label = label, hjust = hjust, vjust = vjust),
+    family = dviz_font_family
+  ) +
+  scale_x_continuous(
+    name = "percentage point advantage for blue",
+    labels = scales::percent_format(accuracy = 0.1, scale = 1)
+  ) +
+  scale_y_continuous(
+    name = NULL,
+    breaks = NULL,
+    expand = c(0, 0),
+    limits = c(0, dnorm(mu, mu, sd) + 0.045)
+  ) +
+  scale_fill_manual(
+    values = c(A = "#f8f1a9", B = "#b1daf4"),
+    guide = "none"
+  ) +
+  theme_dviz_open(20, font_family = "Roboto Light")
+```
+
+.footnote[Code taken from [Wilke](https://clauswilke.com/dataviz/)]
+
+---
+# Descretized version
+
+```{r descritized2-eval, echo = FALSE}
+discretized2 <- data.frame(x = qnorm(ppoints(20), 1.02, 0.9)) %>% 
+  mutate(winner = ifelse(x <= 0, "#b1daf4", "#f8f1a9"))
+
+ggplot(discretized2, aes(x)) +
+  geom_dotplot(aes(fill = winner), binwidth = 0.4) +
+  geom_vline(xintercept = 0.1, color = "gray40", linetype = 2, size = 1.4) +
+  scale_fill_identity(guide = "none") +
+  scale_x_continuous(name = "", 
+                     limits = c(-1, 3),
+                     labels = scales::percent_format(scale = 1)) +
+  theme_dviz_open(20, font_family = "Roboto Light") +
+  scale_y_continuous(breaks = NULL,
+                     name = "") +
+  labs(caption = "Each ball represents 5% probability")
+```
+
+---
+class: inverse-red middle
+# Point estimates
+A few alternatives to error bars
+
+---
+# Multiple error bars
+
+```{r fig.height = 9}
+m <- lm(cty ~ displ + class, mpg)
+tidied_m <- broom::tidy(m, conf.int = TRUE)
+ggplot(tidied_m, aes(term, estimate)) +
+  geom_hline(yintercept = 0,
+             color = "cornflowerblue",
+             linetype = 2) +
+  geom_errorbar(aes(ymin = estimate + qnorm(.025)*std.error, 
+                    ymax = estimate + qnorm(.975)*std.error,
+                    color = "95%"),
+                width = 0.2,
+                size = 0.8) + 
+  geom_errorbar(aes(ymin = estimate + qnorm(.05)*std.error, 
+                    ymax = estimate + qnorm(.95)*std.error,
+                    color = "90%"),
+                width = 0.2,
+                size = 1.2) + # 90% CI
+  geom_errorbar(aes(ymin = estimate + qnorm(.1)*std.error, 
+                    ymax = estimate + qnorm(.9)*std.error,
+                    color = "80%"),
+                width = 0.2,
+                size = 1.6) + # 80% CI
+  scale_color_manual("Confidence Interval",
+                     values = c("#4375D3",
+                                lighten("#4375D3", .3),
+                                lighten("#4375D3", .6))) +
+  geom_point() +
+  coord_flip()
+```
+
+---
+# Density stripes
+
+```{r }
+library(ungeviz)
+ggplot(tidied_m, aes(estimate, term)) +
+  stat_confidence_density(aes(moe = std.error),
+                          fill = "#4375D3",
+                          height = 0.6) +
+  xlim(-10, 35) +
+  geom_point()
+```
+
+---
+# Actual densities
+
+```{r densities}
+library(ggridges)
+ggplot(tidied_m, aes(estimate, term)) +
+  stat_confidence_density(aes(moe = std.error, 
+                              height = stat(density)),
+                          geom = "ridgeline",
+                          confidence = 0.95,
+                          min_height = 0.001,
+                          alpha = 0.7,
+                          fill = "#4375D3") +
+  xlim(-10, 35) 
+```
+
+---
+class: inverse-red middle
+# HOPs
+### Hypothetical Outcome Plots (and related plots)
+
+---
+# Standard regression plot
+
+```{r loess1}
+ggplot(mtcars, aes(disp, mpg)) +
+  geom_point() +
+  geom_smooth()
+```
+
+---
+# Alternative
+
+```{r bootstrap1, echo = FALSE}
+samps <- rerun(100,
+      sample(seq_len(nrow(mtcars)), nrow(mtcars), replace = TRUE))
+d_samps <- map_df(samps, ~mtcars[., ], .id = "sample")
+
+ggplot(mtcars, aes(disp, mpg)) +
+  geom_point() +
+  geom_smooth(aes(group = sample), 
+              data = d_samps, 
+              se = FALSE,
+              color = "#4375D3",
+              fullrange = TRUE,
+              size = 0.1)
+```
+
+---
+# HOPs
+Hops animate the process, so you can't settle on one "truth"
+
+```{r hop1, echo = FALSE, eval = FALSE}
+library(gganimate)
+animated_p <- ggplot(mtcars, aes(disp, mpg)) +
+  geom_point() +
+  stat_smooth(data = d_samps,
+              geom = "line",
+              size = 2,
+              color = "#4375D3",
+              fullrange = TRUE) +
+  transition_states(sample, 
+                    transition_length = 0.5,
+                    state_length = 0.5) +
+   ease_aes('linear') +
+  theme_minimal(25)
+
+animate(animated_p, fps = 5, width = 800)
+anim_save(here::here("static", "slides", "img", "loess_hop.gif"))
+```
+
+![](img/loess_hop.gif)
+
+---
+# Another example
+
+![](https://github.com/wilkelab/ungeviz/raw/master/man/figures/README-cacao-samples-anim-1.gif)
+
+---
+# Last few note on uncertainty
+* Do try to communicate uncertainty whenever possible
+
+* I'd highly recommend watching [this](https://youtu.be/E1kSnWvqCw0) talk by Matthew Kay on the topic
+
+---
+class: inverse-blue middle
 # Data ink ratio
 
 ---
@@ -580,6 +885,12 @@ class: inverse-red  middle
 
 ---
 class: inverse-red middle
+## Include uncertainty wherever possible
+
+<br>
+
+--
+
 ## Avoid line drawings
 
 <br>

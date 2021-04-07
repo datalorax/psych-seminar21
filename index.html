@@ -4,7 +4,7 @@
     <title>Some data viz advice</title>
     <meta charset="utf-8" />
     <meta name="author" content="Daniel Anderson" />
-    <script src="libs/header-attrs-2.7.4/header-attrs.js"></script>
+    <script src="libs/header-attrs-2.7.6/header-attrs.js"></script>
     <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
     <script src="https://unpkg.com/feather-icons"></script>
     <link rel="stylesheet" href="new.css" type="text/css" />
@@ -333,6 +333,121 @@ Get a subset
 
 ---
 class: inverse-blue middle
+# Visualizing Uncertainty
+
+---
+# The primary problem
+* When we see a point on a plot, we interpret it as .bolder[THE] value.
+
+![](index_files/figure-html/loc_point-1.png)&lt;!-- --&gt;
+
+---
+# Some secondary problem
+* We're not great at understanding probabilities
+* We regularly round probabilities to 100% or 0%
+* As probabilities move to the tails, we're generally worse
+
+---
+# How do we typically communicate uncertainty?
+* Error bars
+
+![](index_files/figure-html/error_bars-1.png)&lt;!-- --&gt;
+
+---
+# Thinking about uncertainty
+Uncertainty means exactly what it sounds like - we are not 100% sure.
+
+* We are nearly always uncertain of future events (forecasting)
+* We can also be uncertain about past events 
+  + I saw a parked car at 8 AM, but the next time I looked at 2PM it was gone. What time did it leave?
+  
+
+--
+### Quantifying uncertainty
+* We quantify our uncertainty mathematically using probability
+* Framing probabilities as frequencies is generally more intuitive
+
+---
+class: bottom
+background-image:url("https://serialmentor.com/dataviz/visualizing_uncertainty_files/figure-html/probability-waffle-1.png")
+background-size:contain
+
+# Framing a single uncertainty
+
+---
+# Non-discrete probabilities
+
+Blue party has 1% advantage w/ margin of error of 1.76 points
+
+### Who will win?
+
+--
+
+![](index_files/figure-html/pdf-1.png)&lt;!-- --&gt;
+
+.footnote[Code taken from [Wilke](https://clauswilke.com/dataviz/)]
+
+---
+# Descretized version
+
+![](index_files/figure-html/descritized2-eval-1.png)&lt;!-- --&gt;
+
+---
+class: inverse-red middle
+# Point estimates
+A few alternatives to error bars
+
+---
+# Multiple error bars
+
+![](index_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+---
+# Density stripes
+
+![](index_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+---
+# Actual densities
+
+![](index_files/figure-html/densities-1.png)&lt;!-- --&gt;
+
+---
+class: inverse-red middle
+# HOPs
+### Hypothetical Outcome Plots (and related plots)
+
+---
+# Standard regression plot
+
+![](index_files/figure-html/loess1-1.png)&lt;!-- --&gt;
+
+---
+# Alternative
+
+![](index_files/figure-html/bootstrap1-1.png)&lt;!-- --&gt;
+
+---
+# HOPs
+Hops animate the process, so you can't settle on one "truth"
+
+
+
+![](img/loess_hop.gif)
+
+---
+# Another example
+
+![](https://github.com/wilkelab/ungeviz/raw/master/man/figures/README-cacao-samples-anim-1.gif)
+
+---
+# Last few note on uncertainty
+* Do try to communicate uncertainty whenever possible
+
+* I'd highly recommend watching [this](https://youtu.be/E1kSnWvqCw0) talk by Matthew Kay on the topic
+
+---
+class: inverse-blue middle
 # Data ink ratio
 
 ---
@@ -427,6 +542,12 @@ class: inverse-red  middle
 
 ---
 class: inverse-red middle
+## Include uncertainty wherever possible
+
+&lt;br&gt;
+
+--
+
 ## Avoid line drawings
 
 &lt;br&gt;
